@@ -1,5 +1,6 @@
 '''
-각 구독자 마다 데이터 리더 라이터 관리.
+@ author 2016024793 김유진
+Simple middleware implementation - Publisher
 '''
 import threading
 import socket
@@ -72,6 +73,9 @@ class PubTcpHandler(socketserver.BaseRequestHandler):
             self.request.close()
     
     def sendData(self, topic, subscriber):
+        '''
+        Send corresponding data to a subscriber.
+        '''
         global pub
         data = pub.topic[topic]
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -87,19 +91,10 @@ class PubTcpHandler(socketserver.BaseRequestHandler):
         sock.send(msg.encode('utf-8'))        
         sock.close()
 
-    def REPORT(self, cmd):
-        '''
-        GET report of matched topics from broker
-        cmd would look be something like this: 
-            REPORT [topicname] ip:port ip:port ...
-        '''
-        topicname = cmd.split(' ')[1]
-        tmp = cmd.split(' ')[2:]
-        self.request.close()
-
     def SUBREQ(self, cmd):
         '''
-        Subscribe request from a subscriber
+        Subscribe request from a subscriber.
+        cmd would look be something like this:
             SUBREQ [topicname] [subscriber-ip:subscriber-port]
         '''
         global pub
@@ -125,7 +120,10 @@ class PubTcpHandler(socketserver.BaseRequestHandler):
     
     def DEL(self, cmd):
         '''
-        DEL [ip:port]
+        Delete request from broker. 
+        remove corresponding address from subscriber list.
+        cmd would look be something like this:
+            DEL [ip:port]
         '''
         global pub
         ip, port = cmd.split(' ')[-1].split(':')
@@ -205,21 +203,14 @@ class Publisher:
         send topic register request to the broker
             REQ PUB [topicname] [ip] [port]
         '''
-        topicname = command.split(' ')[-1]
+        topicname = command.split(' ')[-1].upper()
         # topicname = input('> topic name: ')
         # topicperiod = input('> period(in sec): ')
         # data = input('> file name: ')
         data = input('> corresponding message: ')
         # TODO: requst file to publish
 
-        msg = 'REQ PUB {} {}:{}'.format(topicname, self.ip, self.port)
-        thread = format.Sender(self.broker_ip, self.broker_port, msg)
-        response = thread.start()
-
-        if response.split(' ')[0] == '200':
-            pub.publish(topicname, data)
-            # pub.printStatus()
-        elif response.split(' ')[0] == '400':
+        if topicname in pub.topic.keys():
             pub.updateData(topicname, data)
             print('Starting sending messages to subscribers...')
             subscribers = pub.getSubscribers(topicname)
@@ -229,10 +220,17 @@ class Publisher:
                 ip,port = s
                 thread = format.Sender(ip, port, msg)
                 thread.start()
-        '''
-        TODO: pub하면 기존 subscriber 에게 새로 메시지 뿌리기...
-        '''
 
+        msg = 'REQ PUB {} {}:{}'.format(topicname, self.ip, self.port)
+        thread = format.Sender(self.broker_ip, self.broker_port, msg)
+        response = thread.start()
+
+        if response.split(' ')[0] == '200':
+            pub.publish(topicname, data)
+            # pub.printStatus()
+        elif response.split(' ')[0] == '400':
+            pass
+            
 pub = PublisherManager()
 lock = threading.Lock()
 

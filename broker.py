@@ -1,20 +1,13 @@
 '''
-pub 
-sub
-matched
+@ author 2016024793 김유진
+Simple middleware implementation - Broker
 '''
-
 from format import *
 import socket
 import threading
 import time
 import enum
 
-'''
-keep alive 관리하는 스레드가 시간이 초과되면 
-해당 주소로 연결, 살아있나 확인.
-
-'''
 class MessageBrokerManager:
     def __init__(self):
         self.pub = {}     # topic:['ip:port', ...] 
@@ -107,6 +100,10 @@ class MessageBrokerHandler(Handler):
         Handler.__init__(self, client, local_ip, local_port)
     
     def check_matched(self):
+        '''
+        function for checking matched pairs. 
+        If a match is found, send a REPORT message to the subscribers.
+        '''
         global broker
         tmp = {}
         for topic in broker.sub:
@@ -152,7 +149,8 @@ class MessageBrokerHandler(Handler):
         
     def QUIT(self, cmd):
         '''
-        QUIT {type} {ip:port}
+        Terminate program. Before terminating, send quit message to broker
+            QUIT {type} {ip:port}
         ''' 
         _, type, addr = cmd.split(' ')
         

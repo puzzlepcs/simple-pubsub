@@ -1,10 +1,6 @@
 '''
-스레드 2(3)개 관리.
-
-listen port 열어두기. 이 포트 넘버를 브로커에 넘겨주기.
-
-1) 브로커로 연결.
-2) 퍼블리셔로 연결. -> 데이터 받는 스레드 생성.
+@ author 2016024793 김유진
+Simple middleware implementation - Subscriber
 '''
 import threading
 import socket
@@ -107,6 +103,7 @@ class SubTcpHandler(socketserver.BaseRequestHandler):
     def DATA(self, cmd):
         '''
         Receive data from a publisher.
+        DATA [actual message]
         '''
         msg = cmd.split(' ')[1:]
         msg = ' '.join(msg)
@@ -115,6 +112,8 @@ class SubTcpHandler(socketserver.BaseRequestHandler):
     
     def DEL(self, cmd):
         '''
+        Delete request from broker.
+        delete corresponding address form pub list.
         DEL [ip:port]
         '''
         global sub
@@ -195,7 +194,7 @@ class Subscriber:
             REQ SUB [topicname] [ip] [port]
         '''
         global sub
-        topicname = command.split(' ')[-1]
+        topicname = command.split(' ')[-1].upper()
         
         msg = 'REQ SUB {} {}:{}'.format(topicname, self.ip, self.port)
         thread = format.Sender(self.broker_ip, self.broker_port, msg)

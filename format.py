@@ -1,3 +1,8 @@
+'''
+@ author 2016024793 김유진
+Simple middleware implementation - Format
+- definition of topic class and other classes.
+'''
 import enum
 import socket
 import threading
@@ -80,7 +85,7 @@ class Sender(threading.Thread):
         tmp =''
         try:
             tmp = self.socket.recv(1024).decode('utf-8')
-            print('From', self.ip, ':', self.port, ':', tmp)
+            # print('From', self.ip, ':', self.port, ':', tmp)
         except:
             print('Failed to recv from:', self.ip, ':', self.port)
         finally:
