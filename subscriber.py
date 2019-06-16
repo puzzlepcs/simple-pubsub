@@ -103,11 +103,11 @@ class SubTcpHandler(socketserver.BaseRequestHandler):
     def DATA(self, cmd):
         '''
         Receive data from a publisher.
-        DATA [actual message]
+        DATA [topic:actual message]
         '''
         msg = cmd.split(' ')[1:]
         msg = ' '.join(msg)
-        print('\n >>> Publisher {}: {}\n'.format(self.client_address, msg))
+        print('\n >>> {}\n'.format(msg))
         self.request.close()
     
     def DEL(self, cmd):

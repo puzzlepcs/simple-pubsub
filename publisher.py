@@ -86,7 +86,7 @@ class PubTcpHandler(socketserver.BaseRequestHandler):
         except:
             print('Connection to ', subscriber, 'failed. Publish failure.')
             sock.close()
-        msg = 'DATA {}'.format(data)
+        msg = 'DATA {}: {}'.format(topic, data)
         # send data
         sock.send(msg.encode('utf-8'))        
         sock.close()
@@ -203,7 +203,7 @@ class Publisher:
         send topic register request to the broker
             REQ PUB [topicname] [ip] [port]
         '''
-        topicname = command.split(' ')[-1].upper()
+        topicname = command.split(' ')[1].upper()
         # topicname = input('> topic name: ')
         # topicperiod = input('> period(in sec): ')
         # data = input('> file name: ')
@@ -214,7 +214,7 @@ class Publisher:
             pub.updateData(topicname, data)
             print('Starting sending messages to subscribers...')
             subscribers = pub.getSubscribers(topicname)
-            msg = 'DATA {} '.format(data)
+            msg = 'DATA {}: {} '.format(topicname, data)
 
             for s in subscribers:
                 ip,port = s
